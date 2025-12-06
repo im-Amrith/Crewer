@@ -6,3 +6,4 @@ langchain-google-genai
 python-dotenv
 streamlit
 crewai[google-genai]
+pypdf
