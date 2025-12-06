@@ -5,3 +5,4 @@ langchain_community
 langchain-google-genai
 python-dotenv
 streamlit
+crewai[google-genai]
