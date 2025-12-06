@@ -17,24 +17,6 @@ class JobSearchCrew:
         self.search_tool = SerperDevTool()
         self.scrape_tool = ScrapeWebsiteTool()
         self.read_resume = FileReadTool(file_path='./data/fake_resume.md')
-        self.semantic_search_resume = MDXSearchTool(
-            mdx='./data/fake_resume.md',
-            config=dict(
-                llm=dict(
-                    provider="google",
-                    config=dict(
-                        model="gemini-1.5-flash",
-                    ),
-                ),
-                embedder=dict(
-                    provider="google",
-                    config=dict(
-                        model="models/embedding-001",
-                        task_type="retrieval_document",
-                    ),
-                ),
-            )
-        )
 
     def run(self):
         # Agent 1: Researcher
@@ -62,7 +44,7 @@ class JobSearchCrew:
             goal="Do increditble research on job applicants "
                  "to help them stand out in the job market",
             tools = [self.scrape_tool, self.search_tool,
-                     self.read_resume, self.semantic_search_resume],
+                     self.read_resume],
             verbose=True,
             backstory=(
                 "Equipped with analytical prowess, you dissect "
@@ -80,7 +62,7 @@ class JobSearchCrew:
             goal="Find all the best ways to make a "
                  "resume stand out in the job market.",
             tools = [self.scrape_tool, self.search_tool,
-                     self.read_resume, self.semantic_search_resume],
+                     self.read_resume],
             verbose=True,
             backstory=(
                 "With a strategic mind and an eye for detail, you "
@@ -97,7 +79,7 @@ class JobSearchCrew:
             goal="Create interview questions and talking points "
                  "based on the resume and job requirements",
             tools = [self.scrape_tool, self.search_tool,
-                     self.read_resume, self.semantic_search_resume],
+                     self.read_resume],
             verbose=True,
             backstory=(
                 "Your role is crucial in anticipating the dynamics of "
@@ -112,10 +94,9 @@ class JobSearchCrew:
         # Tasks
         research_task = Task(
             description=(
-                "Analyze the job posting URL provided ({job_posting_url}) "
+                "Analyze the job posting content provided ({job_posting_content}) "
                 "to extract key skills, experiences, and qualifications "
-                "required. Use the tools to gather content and identify "
-                "and categorize the requirements."
+                "required. Identify and categorize the requirements."
             ),
             expected_output=(
                 "A structured list of job requirements, including necessary "
@@ -128,7 +109,7 @@ class JobSearchCrew:
         profile_task = Task(
             description=(
                 "Compile a detailed personal and professional profile "
-                "using the GitHub ({github_url}) and LinkedIn ({linkedin_url}) URLs, "
+                "using the GitHub ({github_url}) URL, the provided LinkedIn/Resume text ({linkedin_content}), "
                 "and personal write-up ({personal_writeup}). Utilize tools to extract and "
                 "synthesize information from these sources."
             ),

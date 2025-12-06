@@ -1,6 +1,7 @@
 import streamlit as st
 import sys
 import os
+from pypdf import PdfReader
 
 # Add the current directory to sys.path
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
@@ -74,29 +75,47 @@ if crew_selection == "Job Search Assistant":
     st.markdown("### Accelerate your career with AI-driven insights")
     st.markdown("Our agents analyze job postings and your profile to generate tailored resumes and interview prep materials.")
     st.markdown("---")
-
     with st.form("job_search_form"):
+        st.info("💡 Tip: For best results, paste the full text content instead of URLs for LinkedIn and Job Postings to avoid scraping blocks.")
+        
         col1, col2 = st.columns(2)
         with col1:
-            job_posting_url = st.text_input("Job Posting URL", placeholder="https://company.com/careers/job-id")
+            job_posting_content = st.text_area("Job Posting Description", placeholder="Paste the full job description here...", height=300)
             github_url = st.text_input("GitHub Profile URL", placeholder="https://github.com/username")
         with col2:
-            linkedin_url = st.text_input("LinkedIn Profile URL", placeholder="https://linkedin.com/in/username")
+            resume_file = st.file_uploader("Upload Resume (PDF, TXT, MD)", type=["pdf", "txt", "md"])
+            st.markdown("<div style='text-align: center; font-weight: bold;'>OR</div>", unsafe_allow_html=True)
+            linkedin_content = st.text_area("Paste Resume / LinkedIn Text", placeholder="Paste your LinkedIn 'About' section and Experience here...", height=150)
             
         personal_writeup = st.text_area("Personal Bio & Goals", placeholder="Briefly describe your background, key skills, and what you are looking for...", height=150)
         
         submitted = st.form_submit_button("🚀 Launch Job Search Crew")
 
     if submitted:
-        if not job_posting_url or not github_url or not linkedin_url or not personal_writeup:
-            st.error("Please fill in all required fields.")
+        # Process resume content
+        resume_text = linkedin_content
+        if resume_file is not None:
+            try:
+                if resume_file.type == "application/pdf":
+                    reader = PdfReader(resume_file)
+                    resume_text = ""
+                    for page in reader.pages:
+                        resume_text += page.extract_text() + "\n"
+                else:
+                    resume_text = resume_file.read().decode("utf-8")
+            except Exception as e:
+                st.error(f"Error reading file: {str(e)}")
+                resume_text = None
+
+        if not job_posting_content or not github_url or not resume_text or not personal_writeup:
+            st.error("Please fill in all required fields. You must provide a Resume (Upload or Paste), Job Posting, GitHub URL, and Personal Bio.")
         else:
             with st.spinner("🤖 Agents are working... Analyzing job, profiling candidate, and strategizing..."):
                 try:
                     inputs = {
-                        'job_posting_url': job_posting_url,
+                        'job_posting_content': job_posting_content,
                         'github_url': github_url,
-                        'linkedin_url': linkedin_url,
+                        'linkedin_content': resume_text,
                         'personal_writeup': personal_writeup
                     }
                     crew = JobSearchCrew()
