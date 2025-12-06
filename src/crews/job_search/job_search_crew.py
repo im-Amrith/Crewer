@@ -17,7 +17,24 @@ class JobSearchCrew:
         self.search_tool = SerperDevTool()
         self.scrape_tool = ScrapeWebsiteTool()
         self.read_resume = FileReadTool(file_path='./data/fake_resume.md')
-        self.semantic_search_resume = MDXSearchTool(mdx='./data/fake_resume.md')
+        self.semantic_search_resume = MDXSearchTool(
+            mdx='./data/fake_resume.md',
+            config=dict(
+                llm=dict(
+                    provider="google",
+                    config=dict(
+                        model="gemini-1.5-flash",
+                    ),
+                ),
+                embedder=dict(
+                    provider="google",
+                    config=dict(
+                        model="models/embedding-001",
+                        task_type="retrieval_document",
+                    ),
+                ),
+            )
+        )
 
     def run(self):
         # Agent 1: Researcher
